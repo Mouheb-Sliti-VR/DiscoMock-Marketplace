@@ -1,6 +1,6 @@
 // services/orderService.js
 const { v4: uuidv4 } = require('uuid');
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(mod => mod.default(...args));
 const { productOfferings, productSpecifications } = require('../data/catalogData');
 const { QUOTES, ORDERS, INSTANCES } = require('../store/memoryStore');
 const { computePriceForSelection } = require('./priceService');
