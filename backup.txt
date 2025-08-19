@@ -1,0 +1,407 @@
+
+// ------------------------------
+// Bundle Offers For Marketplace
+// ------------------------------
+const MarketplaceBundleOffer = [
+    {
+        id: "METAVERSE_MARKETPLACE_BUNDLE_001",
+        name: "Metaverse Marketplace Bundle",
+        description: "Complete partner advertising bundle for Orange Metaverse",
+        lifecycleStatus: "ACTIVE",
+        version: "1.0",
+        isBundle: true,
+        isSellable: true,
+        channel: ["marketplace"],
+        bundledProductOffering: [
+            {
+                id: "LOGO_OFFER_001",
+                name: "Partner Logo Offer",
+                bundledProductOfferingOption: {
+                    numberRelOfferLowerLimit: 1,
+                    numberRelOfferUpperLimit: 1
+                }
+            },
+            {
+                id: "IMG_ADS_OFFER_001",
+                name: "Images Advertisement Offer",
+                bundledProductOfferingOption: {
+                    numberRelOfferLowerLimit: 0,
+                    numberRelOfferUpperLimit: 1
+                }
+            },
+            {
+                id: "VIDEO_ADS_OFFER_001",
+                name: "Video Advertisement Offer",
+                bundledProductOfferingOption: {
+                    numberRelOfferLowerLimit: 0,
+                    numberRelOfferUpperLimit: 1
+                }
+            },
+            {
+                id: "MIXED_ADS_OFFER_001",
+                name: "Mixed Advertisement Offer",
+                bundledProductOfferingOption: {
+                    numberRelOfferLowerLimit: 0,
+                    numberRelOfferUpperLimit: 1
+                }
+            },
+            {
+                id: "3D_MODEL_ADS_OFFER_001",
+                name: "3D Model Advertisement Offer",
+                bundledProductOfferingOption: {
+                    numberRelOfferLowerLimit: 0,
+                    numberRelOfferUpperLimit: 1
+                }
+            }
+        ]
+    }
+];
+
+// ------------------------------
+// Product Offerings
+// ------------------------------
+const productOfferings = [
+  {
+    id: 'LOGO_OFFER_001',
+    name: 'Partner Logo Offer',
+    description: 'Mandatory partner logo upload for metaverse presence',
+    lifecycleStatus: 'ACTIVE',
+    version: '1.0',
+    isBundle: false,
+    isSellable: true,
+    channel: ['marketplace'],
+    productSpecification: { id: 'LOGO_SPEC_001', href: '/productCatalog/productSpecification/LOGO_SPEC_001' },
+    productOfferingPrice: [
+      {
+        id: 'LOGO_FREE_PRICE',
+        name: 'Logo Free Price',
+        description: 'Free mandatory logo upload',
+        lifecycleStatus: 'ACTIVE',
+        priceType: 'ONE_TIME',
+        price: { taxIncludedAmount: { value: 0.0, unit: 'EUR' } }
+      }
+    ],
+    productOfferingTerm: [
+      { name: 'Mandatory Upload', description: 'Required upon partner registration' }
+    ],
+    href: '/productCatalog/productOffering/LOGO_OFFER_001'
+  },
+  {
+    id: 'IMG_ADS_OFFER_001',
+    name: 'Images Advertisement Offer',
+    description: 'Upload and display image advertisements in Orange Metaverse',
+    lifecycleStatus: 'ACTIVE',
+    version: '1.0',
+    isBundle: false,
+    isSellable: true,
+    channel: ['marketplace'],
+    productSpecification: { id: 'IMAGE_ADS_SPEC_001', href: '/productCatalog/productSpecification/IMAGE_ADS_SPEC_001' },
+    productOfferingPrice: [
+      {
+        id: 'IMAGE_FIXED_PRICE',
+        name: 'Image Fixed Price',
+        description: 'Fixed price for one image advertisement',
+        lifecycleStatus: 'ACTIVE',
+        priceType: 'ONE_TIME',
+        price: { taxIncludedAmount: { value: 25.0, unit: 'EUR' } }
+      }
+    ],
+    href: '/productCatalog/productOffering/IMG_ADS_OFFER_001'
+  },
+  {
+    id: 'VIDEO_ADS_OFFER_001',
+    name: 'Video Advertisement Offer',
+    description: 'Upload and display video advertisements in Orange Metaverse',
+    lifecycleStatus: 'ACTIVE',
+    version: '1.0',
+    isBundle: false,
+    isSellable: true,
+    channel: ['marketplace'],
+    productSpecification: { id: 'VIDEO_ADS_SPEC_001', href: '/productCatalog/productSpecification/VIDEO_ADS_SPEC_001' },
+    productOfferingPrice: [
+      {
+        id: 'VIDEO_FIXED_PRICE',
+        name: 'Video Fixed Price',
+        description: 'Fixed price for one video advertisement',
+        lifecycleStatus: 'ACTIVE',
+        priceType: 'ONE_TIME',
+        price: { taxIncludedAmount: { value: 50.0, unit: 'EUR' } }
+      }
+    ],
+    href: '/productCatalog/productOffering/VIDEO_ADS_OFFER_001'
+  },
+  {
+    id: 'MIXED_ADS_OFFER_001',
+    name: 'Mixed Advertisement Offer',
+    description: 'Upload combination of images and videos for metaverse advertising',
+    lifecycleStatus: 'ACTIVE',
+    version: '1.0',
+    isBundle: false,
+    isSellable: true,
+    channel: ['marketplace'],
+    productSpecification: { id: 'MIXED_ADS_SPEC_001', href: '/productCatalog/productSpecification/MIXED_ADS_SPEC_001' },
+    productOfferingPrice: [
+      {
+        id: 'MIXED_BASE_PRICE',
+        name: 'Mixed Content Base Price',
+        description: 'Base price for mixed content advertising',
+        lifecycleStatus: 'ACTIVE',
+        priceType: 'ONE_TIME',
+        price: { taxIncludedAmount: { value: 15.0, unit: 'EUR' } }
+      },
+      {
+        id: 'MIXED_IMAGE_PRICE',
+        name: 'Additional Image Price',
+        description: 'Price per additional image in mixed content',
+        lifecycleStatus: 'ACTIVE',
+        priceType: 'ONE_TIME',
+        price: { taxIncludedAmount: { value: 5.0, unit: 'EUR' } }
+      },
+      {
+        id: 'MIXED_VIDEO_PRICE',
+        name: 'Video Addition Price',
+        description: 'Additional price when video is included',
+        lifecycleStatus: 'ACTIVE',
+        priceType: 'ONE_TIME',
+        price: { taxIncludedAmount: { value: 25.0, unit: 'EUR' } }
+      }
+    ],
+    href: '/productCatalog/productOffering/MIXED_ADS_OFFER_001'
+  },
+  {
+    id: '3D_MODEL_ADS_OFFER_001',
+    name: '3D Model Advertisement Offer',
+    description: 'Upload and showcase 3D models in Orange Metaverse',
+    lifecycleStatus: 'ACTIVE',
+    version: '1.0',
+    isBundle: false,
+    isSellable: true,
+    channel: ['marketplace'],
+    productSpecification: { id: '3D_MODEL_ADS_SPEC_001', href: '/productCatalog/productSpecification/3D_MODEL_ADS_SPEC_001' },
+    productOfferingPrice: [
+      {
+        id: '3D_MODEL_FIXED_PRICE',
+        name: '3D Model Fixed Price',
+        description: 'Fixed price for 3D model showcase',
+        lifecycleStatus: 'ACTIVE',
+        priceType: 'ONE_TIME',
+        price: { taxIncludedAmount: { value: 100.0, unit: 'EUR' } }
+      }
+    ],
+    href: '/productCatalog/productOffering/3D_MODEL_ADS_OFFER_001'
+  },
+];
+
+
+
+// ------------------------------
+// Product Specifications
+// ------------------------------
+const productSpecifications = [
+  {
+    id: 'LOGO_SPEC_001',
+    name: 'Partner Logo Specification',
+    description: 'Specification for mandatory partner logo in metaverse',
+    productSpecificationType: 'ATOMIC',
+    lifecycleStatus: 'ACTIVE',
+    version: '1.0',
+    channel: ['marketplace'],
+    productSpecCharacteristic: [
+      {
+        id: 'LOGO_FORMAT',
+        name: 'Logo Format',
+        description: 'Accepted logo formats',
+        valueType: 'string',
+        configurable: false,
+        productSpecCharacteristicValue: [
+          { value: 'image/png', isDefault: true },
+          { value: 'image/jpeg', isDefault: false },
+          { value: 'image/svg+xml', isDefault: false }
+        ]
+      },
+      {
+        id: 'LOGO_MAX_SIZE',
+        name: 'Maximum Logo Size',
+        description: 'Maximum logo file size',
+        valueType: 'integer',
+        configurable: false,
+        productSpecCharacteristicValue: [
+          { value: '5242880', unitOfMeasure: 'bytes', isDefault: true }
+        ]
+      }
+    ],
+    href: '/productCatalog/productSpecification/LOGO_SPEC_001'
+  },
+  {
+    id: 'IMAGE_ADS_SPEC_001',
+    name: 'Image Advertisement Specification',
+    description: 'Specification for partner image advertisement content in metaverse',
+    productSpecificationType: 'ATOMIC',
+    lifecycleStatus: 'ACTIVE',
+    version: '1.0',
+    channel: ['marketplace'],
+    productSpecCharacteristic: [
+      {
+        id: 'IMAGE_FORMAT',
+        name: 'Image Format',
+        description: 'Accepted image formats',
+        valueType: 'string',
+        configurable: false,
+        productSpecCharacteristicValue: [
+          { value: 'image/png', isDefault: true },
+          { value: 'image/jpeg', isDefault: false },
+          { value: 'image/webp', isDefault: false }
+        ]
+      },
+      {
+        id: 'IMAGE_MAX_SIZE',
+        name: 'Maximum Image Size',
+        description: 'Maximum image file size',
+        valueType: 'integer',
+        configurable: false,
+        productSpecCharacteristicValue: [
+          { value: '10485760', unitOfMeasure: 'bytes', isDefault: true }
+        ]
+      },
+      {
+        id: 'IMAGE_DIMENSIONS',
+        name: 'Image Dimensions',
+        description: 'Maximum image dimensions',
+        valueType: 'string',
+        configurable: false,
+        productSpecCharacteristicValue: [
+          { value: '2048x2048', description: 'Maximum width and height in pixels', isDefault: true }
+        ]
+      }
+    ],
+    href: '/productCatalog/productSpecification/IMAGE_ADS_SPEC_001'
+  },
+  {
+    id: 'VIDEO_ADS_SPEC_001',
+    name: 'Video Advertisement Specification',
+    description: 'Specification for partner video advertisement content in metaverse',
+    productSpecificationType: 'ATOMIC',
+    lifecycleStatus: 'ACTIVE',
+    version: '1.0',
+    channel: ['marketplace'],
+    productSpecCharacteristic: [
+      {
+        id: 'VIDEO_FORMAT',
+        name: 'Video Format',
+        description: 'Accepted video formats',
+        valueType: 'string',
+        configurable: false,
+        productSpecCharacteristicValue: [
+          { value: 'video/mp4', isDefault: true },
+          { value: 'video/quicktime', isDefault: false }
+        ]
+      },
+      {
+        id: 'VIDEO_MAX_SIZE',
+        name: 'Maximum Video Size',
+        description: 'Maximum video file size',
+        valueType: 'integer',
+        configurable: false,
+        productSpecCharacteristicValue: [
+          { value: '419430400', unitOfMeasure: 'bytes', isDefault: true }
+        ]
+      },
+      {
+        id: 'VIDEO_MAX_DURATION',
+        name: 'Maximum Video Duration',
+        description: 'Maximum video duration in seconds',
+        valueType: 'integer',
+        configurable: false,
+        productSpecCharacteristicValue: [
+          { value: '300', unitOfMeasure: 'seconds', isDefault: true }
+        ]
+      }
+    ],
+    href: '/productCatalog/productSpecification/VIDEO_ADS_SPEC_001'
+  },
+  {
+    id: 'MIXED_ADS_SPEC_001',
+    name: 'Mixed Advertisement Specification',
+    description: 'Specification for mixed content (images + videos) in metaverse',
+    productSpecificationType: 'ATOMIC',
+    lifecycleStatus: 'ACTIVE',
+    version: '1.0',
+    channel: ['marketplace'],
+    productSpecCharacteristic: [
+      {
+        id: 'MIXED_IMG_COUNT',
+        name: 'Image Count',
+        description: 'Number of images in mixed content',
+        valueType: 'integer',
+        configurable: true,
+        productSpecCharacteristicValue: [
+          { valueFrom: '0', valueTo: '4', isDefault: false }
+        ]
+      },
+      {
+        id: 'MIXED_VIDEO_INCLUDE',
+        name: 'Include Video',
+        description: 'Whether to include video in mixed content',
+        valueType: 'boolean',
+        configurable: true,
+        productSpecCharacteristicValue: [
+          { value: 'false', isDefault: true },
+          { value: 'true', isDefault: false }
+        ]
+      },
+      {
+        id: 'MIXED_CONTENT_CONSTRAINT',
+        name: 'Content Constraint',
+        description: 'At least one content type must be selected',
+        valueType: 'string',
+        configurable: false,
+        productSpecCharacteristicValue: [
+          { value: 'MIN_ONE_CONTENT_TYPE', isDefault: true }
+        ]
+      }
+    ],
+    href: '/productCatalog/productSpecification/MIXED_ADS_SPEC_001'
+  },
+  {
+    id: '3D_MODEL_ADS_SPEC_001',
+    name: '3D Model Advertisement Specification',
+    description: 'Specification for 3D model showcase in metaverse',
+    productSpecificationType: 'ATOMIC',
+    lifecycleStatus: 'ACTIVE',
+    version: '1.0',
+    channel: ['marketplace'],
+    productSpecCharacteristic: [
+      {
+        id: '3D_MODEL_FORMAT',
+        name: '3D Model Format',
+        description: 'Accepted 3D model formats',
+        valueType: 'string',
+        configurable: false,
+        productSpecCharacteristicValue: [
+          { value: 'model/gltf-binary', isDefault: true }
+        ]
+      },
+      {
+        id: '3D_MODEL_MAX_SIZE',
+        name: 'Maximum 3D Model Size',
+        description: 'Maximum 3D model file size',
+        valueType: 'integer',
+        configurable: false,
+        productSpecCharacteristicValue: [
+          { value: '104857600', unitOfMeasure: 'bytes', isDefault: true }
+        ]
+      },
+      {
+        id: '3D_MODEL_COMPLEXITY',
+        name: 'Model Complexity',
+        description: 'Maximum polygon count for performance',
+        valueType: 'integer',
+        configurable: false,
+        productSpecCharacteristicValue: [
+          { value: '50000', unitOfMeasure: 'polygons', isDefault: true }
+        ]
+      }
+    ],
+    href: '/productCatalog/productSpecification/3D_MODEL_ADS_SPEC_001'
+  }
+];
