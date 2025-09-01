@@ -86,11 +86,39 @@ async function validateOrder(payload) {
   return { quoteId, valid, price: total, errors };
 }
 
-function confirmOrder({ quoteId, payload }) {
-  const quote = quoteId ? QUOTES[quoteId] : null;
-  const effective = quote ? quote.payload : payload;
-  if (!effective || !Array.isArray(effective.selections) || !effective.partyId) {
-    throw new Error('Invalid quoteId or payload');
+function confirmOrder(payload) {
+  console.log('Confirming order with payload:', payload);
+  
+  // Handle both direct payload and quoteId cases
+  let effective;
+  if (payload.quoteId) {
+    const quote = QUOTES[payload.quoteId];
+    if (!quote) {
+      throw new Error('Invalid quote ID');
+    }
+    // Merge quote payload with simplified partner info
+    effective = {
+      ...quote.payload,
+      quoteId: payload.quoteId,
+      partner: {
+        email: payload.partner.email,
+        companyName: payload.partner.companyName
+      }
+    };
+  } else {
+    effective = {
+      ...payload,
+      partner: {
+        email: payload.partner.email,
+        companyName: payload.partner.companyName
+      }
+    };
+  }
+
+  console.log('Effective payload:', effective);
+  
+  if (!effective || !Array.isArray(effective.selections)) {
+    throw new Error('Invalid payload structure');
   }
 
   // re-validate selections (sync)
@@ -99,7 +127,18 @@ function confirmOrder({ quoteId, payload }) {
   if (errors.length) return { error: true, errors };
 
   const orderId = uuidv4();
-  const order = { id: orderId, partyId: effective.partyId, selections: effective.selections, status: 'CONFIRMED', createdAt: new Date().toISOString() };
+  const order = { 
+    id: orderId,
+    quoteId: effective.quoteId,
+    partyId: effective.partyId,
+    partner: {
+      email: effective.partner.email,
+      companyName: effective.partner.companyName
+    },
+    selections: effective.selections, 
+    status: 'CONFIRMED', 
+    createdAt: new Date().toISOString() 
+  };
   const createdInstances = [];
   for (const s of effective.selections) {
     const iid = uuidv4();
@@ -108,11 +147,34 @@ function confirmOrder({ quoteId, payload }) {
     createdInstances.push(inst);
   }
   order.instances = createdInstances.map(i => i.id);
-  const total = quote ? quote.price : effective.selections.reduce((acc, s) => acc + (computePriceForSelection(s) || 0), 0);
-  order.billing = { total, currency: 'EUR', lines: effective.selections.map(s => ({ offeringId: s.offeringId, amount: computePriceForSelection(s) || 0 })) };
+  
+  // Get the quote data for pricing if available
+  const quoteData = effective.quoteId ? QUOTES[effective.quoteId] : null;
+  const total = quoteData ? quoteData.price : effective.selections.reduce((acc, s) => acc + (computePriceForSelection(s) || 0), 0);
+  
+  order.billing = { 
+    total, 
+    currency: 'EUR', 
+    lines: effective.selections.map(s => ({ 
+      offeringId: s.offeringId, 
+      amount: computePriceForSelection(s) || 0 
+    })) 
+  };
 
   ORDERS[orderId] = order;
-  return { orderId, status: order.status, instances: order.instances, billing: order.billing };
+  return { 
+    orderId,
+    status: order.status,
+    offering: {
+      id: order.selections[0].offeringId,  // Since we typically have one offering per order
+      count: order.selections[0].imagesCount || order.selections[0].videosCount || 1
+    },
+    billing: {
+      amount: order.billing.total,
+      currency: order.billing.currency
+    },
+    partner: order.partner
+  };
 }
 
 module.exports = {

@@ -2,9 +2,11 @@
 const QUOTES = {};
 const ORDERS = {};
 const INSTANCES = {};
+const SUBSCRIPTIONS = {};
 
 module.exports = {
   QUOTES,
   ORDERS,
-  INSTANCES
+  INSTANCES,
+  SUBSCRIPTIONS
 };

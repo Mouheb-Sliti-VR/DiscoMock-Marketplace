@@ -3,10 +3,12 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const { validateOrder, confirmOrder } = require('../services/orderServer');
+const { createSubscription, getPartnerSubscriptions, getSubscriptionById, getAllSubscriptions, logSubscriptionStats } = require('../services/subscriptionService');
 const { QUOTES, ORDERS } = require('../store/memoryStore');
+require("dotenv").config();
 
 // Auth service URL
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'https://marketplace-vr.onrender.com';
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL;
 
 // Middleware to verify token and get user details
 const verifyToken = async (req, res, next) => {
@@ -23,7 +25,7 @@ const verifyToken = async (req, res, next) => {
     }
 
     // Get user details from your auth service
-    const response = await axios.get(`${AUTH_SERVICE_URL}/auth/getUserDetails`, {
+    const response = await axios.get(`${AUTH_SERVICE_URL}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
@@ -57,8 +59,8 @@ router.post('/validate', verifyToken, async (req, res) => {
     res.json({
       ...result,
       partner: {
-        id: req.user.email,
-        companyName: req.user.companyName
+        companyName: req.user.companyName,
+        email: req.user.email
       }
     });
   } catch (err) {
@@ -69,28 +71,84 @@ router.post('/validate', verifyToken, async (req, res) => {
 // POST /order/confirm
 router.post('/confirm', verifyToken, (req, res) => {
   try {
-    const payload = {
-      ...req.body,
-      partner: {
-        id: req.user.email,
-        companyName: req.user.companyName,
-        email: req.user.email,
-        address: req.user.address,
-        city: req.user.city,
-        country: req.user.country
+    console.log('Starting order confirmation with user:', req.user);
+    console.log('Received confirmation request:', req.body);
+    
+    let payload;
+    if (req.body.quoteId) {
+      // If confirming with a quoteId, get the quote data
+      console.log('Looking for quote with ID:', req.body.quoteId);
+      console.log('Available quotes:', Object.keys(QUOTES));
+      const quote = QUOTES[req.body.quoteId];
+      console.log('Found quote:', quote);
+      
+      if (!quote) {
+        return res.status(400).json({ error: 'Invalid quote ID' });
       }
-    };
+      
+      // Use the quote data as the payload
+      payload = {
+        quoteId: req.body.quoteId,
+        partner: {
+          id: req.user.email,
+          companyName: req.user.companyName,
+          email: req.user.email,
+          address: req.user.address,
+          city: req.user.city,
+          country: req.user.country
+        }
+      };
+    } else {
+      // Direct confirmation with full payload
+      payload = {
+        ...req.body,
+        partner: {
+          id: req.user.email,
+          companyName: req.user.companyName,
+          email: req.user.email,
+          address: req.user.address,
+          city: req.user.city,
+          country: req.user.country
+        }
+      };
+    }
+    
+    console.log('Confirming order with payload:', payload);
     const result = confirmOrder(payload);
+    console.log('Order confirmation result:', result);
+    
     if (result.error) return res.status(400).json(result);
-    // Add partner info to the confirmation response
-    res.status(201).json({
-      ...result,
-      partner: {
-        id: req.user.email,
-        companyName: req.user.companyName,
-        email: req.user.email
-      }
-    });
+
+    // Create subscription for confirmed order
+    console.log('Checking order status:', result.status);
+    if (result.status === 'CONFIRMED') {
+      console.log('Creating subscription for confirmed order...');
+      const partner = {
+        email: req.user.email,
+        companyName: req.user.companyName
+      };
+      console.log('Partner info for subscription:', partner);
+      const subscription = createSubscription(result, partner);
+      console.log('Created subscription:', subscription);
+
+      // Add partner info and subscription to the confirmation response
+      res.status(201).json({
+        ...result,
+        partner: {
+          companyName: req.user.companyName,
+          email: req.user.email
+        },
+        subscription: subscription
+      });
+    } else {
+      res.status(201).json({
+        ...result,
+        partner: {
+          companyName: req.user.companyName,
+          email: req.user.email
+        }
+      });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -106,6 +164,47 @@ router.get('/order/:id', (req, res) => {
   const o = ORDERS[req.params.id];
   if (!o) return res.status(404).json({ code: 404, message: 'order not found' });
   res.json(o);
+});
+
+// Subscription endpoints
+router.get('/subscriptions', verifyToken, (req, res) => {
+  try {
+    const subscriptions = getPartnerSubscriptions(req.user.email);
+    console.log(`Fetching subscriptions for partner: ${req.user.email}`);
+    res.json({
+      partner: {
+        companyName: req.user.companyName,
+        email: req.user.email
+      },
+      subscriptions: subscriptions.map(sub => ({
+        id: sub.id,
+        status: sub.status,
+        startDate: sub.startDate,
+        billing: sub.billing,
+        offering: sub.offering
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/subscription/:id', verifyToken, (req, res) => {
+  try {
+    const subscription = getSubscriptionById(req.params.id);
+    if (!subscription) {
+      return res.status(404).json({ error: 'Subscription not found' });
+    }
+    
+    // Verify the subscription belongs to the requesting partner
+    if (subscription.partnerEmail !== req.user.email) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+    
+    res.json(subscription);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
