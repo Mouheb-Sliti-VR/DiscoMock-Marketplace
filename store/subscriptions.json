@@ -1,0 +1,34 @@
+{
+  "8c62531c-0e83-4958-a3ac-778273095c8b": {
+    "id": "8c62531c-0e83-4958-a3ac-778273095c8b",
+    "orderId": "8c62531c-0e83-4958-a3ac-778273095c8b",
+    "partnerEmail": "mouheb95@gmail.com",
+    "partnerCompanyName": "Mohby95",
+    "status": "ACTIVE",
+    "startDate": "2025-09-03T16:55:45.597Z",
+    "billing": {
+      "amount": 25,
+      "currency": "EUR"
+    },
+    "offering": {
+      "id": "MIXED_ADS_OFFER_001",
+      "count": 2
+    }
+  },
+  "9f32ae22-efd8-48f3-b120-89b653345afc": {
+    "id": "9f32ae22-efd8-48f3-b120-89b653345afc",
+    "orderId": "9f32ae22-efd8-48f3-b120-89b653345afc",
+    "partnerEmail": "mouheb95@gmail.com",
+    "partnerCompanyName": "Mohby95",
+    "status": "ACTIVE",
+    "startDate": "2025-09-03T16:57:41.596Z",
+    "billing": {
+      "amount": 40,
+      "currency": "EUR"
+    },
+    "offering": {
+      "id": "IMG_ADS_OFFER_001",
+      "count": 4
+    }
+  }
+}

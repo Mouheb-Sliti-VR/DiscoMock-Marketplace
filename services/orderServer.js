@@ -13,6 +13,40 @@ function findOffering(id) {
 function findSpecForOffering(offer) {
   return productSpecifications.find(s => s.id === offer?.productSpecification?.id);
 }
+
+function getOfferingCounts(selection) {
+  const offer = findOffering(selection.offeringId);
+  if (!offer) return { count: 0 };
+
+  switch (offer.id) {
+    case 'IMG_ADS_OFFER_001':
+      return {
+        imagesCount: selection.selectedImagesCount
+      };
+    
+    case 'VIDEO_ADS_OFFER_001':
+      return {
+        videosCount: selection.selectedVideosCount
+      };
+    
+    case 'MIXED_ADS_OFFER_001':
+      return {
+        imagesCount: selection.selectedImagesCount,
+        videosCount: selection.selectedVideosCount
+      };
+    
+    case '3D_MODEL_ADS_OFFER_001':
+      return {
+        modelsCount: selection.selectedModelsCount,
+        imagesCount: selection.selectedImagesCount,
+        videosCount: selection.selectedVideosCount
+      };
+    
+    default:
+      return { count: 1 };
+  }
+}
+
 function readSpecNumber(spec, charId) {
   if (!spec) return null;
   const ch = spec.productSpecCharacteristic?.find(c => c.id === charId);
@@ -27,18 +61,56 @@ function validateSelection(sel) {
   const errors = [];
   const offer = findOffering(sel.offeringId);
   if (!offer) { errors.push({ code: 'OFFER_NOT_FOUND', message: `Offering ${sel.offeringId} not found` }); return errors; }
-  const spec = findSpecForOffering(offer);
 
-  if (offer.id === 'IMG_ADS_OFFER_001' || offer.id === 'MIXED_ADS_OFFER_001') {
-    const requested = Number(sel.imagesCount ?? 0);
-    const max = readSpecNumber(spec, 'IMAGE_MAX_COUNT') ?? 4;
-    if (requested > max) errors.push({ code: 'IMAGE_COUNT_EXCEEDED', message: `Requested ${requested} images, max allowed ${max}` });
-  }
+  // Check if required fields are present based on offer type
+  switch (offer.id) {
+    case 'IMG_ADS_OFFER_001':
+      if (sel.selectedImagesCount === undefined) {
+        errors.push({ code: 'MISSING_IMAGES_COUNT', message: 'selectedImagesCount is required for image offers' });
+      }
+      if (sel.selectedImagesCount > offer.ProductSpec.Images) {
+        errors.push({ code: 'IMAGE_COUNT_EXCEEDED', message: `Requested ${sel.selectedImagesCount} images, max allowed ${offer.ProductSpec.Images}` });
+      }
+      break;
 
-  if (offer.id === 'VIDEO_ADS_OFFER_001' || offer.id === 'MIXED_ADS_OFFER_001') {
-    const requestedV = Number(sel.videosCount ?? 0);
-    const maxV = readSpecNumber(spec, 'VIDEO_MAX_COUNT') ?? 1;
-    if (requestedV > maxV) errors.push({ code: 'VIDEO_COUNT_EXCEEDED', message: `Requested ${requestedV} videos, max allowed ${maxV}` });
+    case 'VIDEO_ADS_OFFER_001':
+      if (sel.selectedVideosCount === undefined) {
+        errors.push({ code: 'MISSING_VIDEOS_COUNT', message: 'selectedVideosCount is required for video offers' });
+      }
+      if (sel.selectedVideosCount > offer.ProductSpec.Videos) {
+        errors.push({ code: 'VIDEO_COUNT_EXCEEDED', message: `Requested ${sel.selectedVideosCount} videos, max allowed ${offer.ProductSpec.Videos}` });
+      }
+      break;
+
+    case 'MIXED_ADS_OFFER_001':
+      if (sel.selectedImagesCount === undefined || sel.selectedVideosCount === undefined) {
+        errors.push({ code: 'MISSING_MEDIA_COUNT', message: 'Both selectedImagesCount and selectedVideosCount are required for mixed media offers' });
+      }
+      if (sel.selectedImagesCount > offer.ProductSpec.Images) {
+        errors.push({ code: 'IMAGE_COUNT_EXCEEDED', message: `Requested ${sel.selectedImagesCount} images, max allowed ${offer.ProductSpec.Images}` });
+      }
+      if (sel.selectedVideosCount > offer.ProductSpec.Videos) {
+        errors.push({ code: 'VIDEO_COUNT_EXCEEDED', message: `Requested ${sel.selectedVideosCount} videos, max allowed ${offer.ProductSpec.Videos}` });
+      }
+      break;
+
+    case '3D_MODEL_ADS_OFFER_001':
+      if (sel.selectedModelsCount === undefined) {
+        errors.push({ code: 'MISSING_MODELS_COUNT', message: 'selectedModelsCount is required for 3D model offers' });
+      }
+      if (sel.selectedImagesCount === undefined || sel.selectedVideosCount === undefined) {
+        errors.push({ code: 'MISSING_MEDIA_COUNT', message: 'Both selectedImagesCount and selectedVideosCount are required for 3D model offers' });
+      }
+      if (sel.selectedModelsCount > offer.ProductSpec.maxModels) {
+        errors.push({ code: 'MODEL_COUNT_EXCEEDED', message: `Requested ${sel.selectedModelsCount} models, max allowed ${offer.ProductSpec.maxModels}` });
+      }
+      if (sel.selectedImagesCount > offer.ProductSpec.Images) {
+        errors.push({ code: 'IMAGE_COUNT_EXCEEDED', message: `Requested ${sel.selectedImagesCount} images, max allowed ${offer.ProductSpec.Images}` });
+      }
+      if (sel.selectedVideosCount > offer.ProductSpec.Videos) {
+        errors.push({ code: 'VIDEO_COUNT_EXCEEDED', message: `Requested ${sel.selectedVideosCount} videos, max allowed ${offer.ProductSpec.Videos}` });
+      }
+      break;
   }
 
   return errors;
@@ -87,16 +159,15 @@ async function validateOrder(payload) {
 }
 
 function confirmOrder(payload) {
-  console.log('Confirming order with payload:', payload);
-  
-  // Handle both direct payload and quoteId cases
   let effective;
   if (payload.quoteId) {
     const quote = QUOTES[payload.quoteId];
     if (!quote) {
-      throw new Error('Invalid quote ID');
+      throw new Error({
+        code: 'INVALID_QUOTE',
+        message: 'The provided quote ID is invalid or has expired'
+      });
     }
-    // Merge quote payload with simplified partner info
     effective = {
       ...quote.payload,
       quoteId: payload.quoteId,
@@ -114,8 +185,6 @@ function confirmOrder(payload) {
       }
     };
   }
-
-  console.log('Effective payload:', effective);
   
   if (!effective || !Array.isArray(effective.selections)) {
     throw new Error('Invalid payload structure');
@@ -162,18 +231,33 @@ function confirmOrder(payload) {
   };
 
   ORDERS[orderId] = order;
-  return { 
+  // Internal result with all data needed for subscription
+  const orderResult = {
     orderId,
     status: order.status,
     offering: {
-      id: order.selections[0].offeringId,  // Since we typically have one offering per order
-      count: order.selections[0].imagesCount || order.selections[0].videosCount || 1
+      id: order.selections[0].offeringId,
+      ...getOfferingCounts(order.selections[0])
     },
     billing: {
       amount: order.billing.total,
       currency: order.billing.currency
     },
-    partner: order.partner
+    partner: order.partner,
+    selections: order.selections,
+    instances: order.instances
+  };
+
+  // Clean public response
+  return {
+    orderId: orderResult.orderId,
+    offering: orderResult.offering,
+    billing: orderResult.billing,
+    subscription: {
+      id: orderResult.orderId,  // Using orderId as subscription reference
+      status: 'ACTIVE',
+      startDate: order.createdAt
+    }
   };
 }
 

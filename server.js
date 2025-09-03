@@ -75,9 +75,35 @@ app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'tmf-mock-pr
 // fallback 404 for other routes
 app.use((_req, res) => res.status(404).json({ code: 404, reason: 'Not found' }));
 
+// Setup structured logger
+const logger = {
+  info: (message, meta = {}) => {
+    console.log(JSON.stringify({ timestamp: new Date().toISOString(), level: 'info', message, ...meta }));
+  },
+  error: (message, meta = {}) => {
+    console.error(JSON.stringify({ timestamp: new Date().toISOString(), level: 'error', message, ...meta }));
+  }
+};
+
+// Error handler middleware
+app.use((err, req, res, next) => {
+  logger.error('Unhandled error', { 
+    error: err.message,
+    path: req.path,
+    method: req.method
+  });
+  
+  res.status(500).json({
+    status: 'error',
+    code: 'INTERNAL_SERVER_ERROR',
+    message: 'An unexpected error occurred'
+  });
+});
+
 app.listen(PORT, () => {
-  console.log(`TMF mock server listening on http://localhost:${PORT}`);
-  console.log(`- Catalog projection: GET http://localhost:${PORT}/catalog/items`);
-  console.log(`- Raw offers:        GET http://localhost:${PORT}/productCatalog/productOffering`);
-  console.log(`- Raw specs:         GET http://localhost:${PORT}/productCatalog/productSpecification`);
+  logger.info('Server started', { 
+    port: PORT,
+    env: process.env.NODE_ENV || 'development',
+    service: 'tmf-mock-product-catalog'
+  });
 });
