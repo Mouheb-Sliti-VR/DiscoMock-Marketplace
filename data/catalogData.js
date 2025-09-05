@@ -156,7 +156,7 @@ const productOfferings = [
   {
     id: "3D_MODEL_ADS_OFFER_001",
     name: "3D Model Advertisement Offer",
-    description: "Upload and showcase 3D models in Orange Metaverse",
+    description: "Upload and showcase 3D models with supporting images in Orange Metaverse",
     lifecycleStatus: "ACTIVE",
     version: "1.0",
     isBundle: false,
@@ -383,23 +383,13 @@ const productSpecifications = [
         ],
       },
       {
-        id: "3D_MODEL_ASSOCIATED_IMAGES",
-        name: "Associated Images Allowed",
-        description: "Number of images allowed when adding a 3D model as add-on",
-        valueType: "integer",
+        id: "3D_MODEL_ONLY",
+        name: "3D Model Only",
+        description: "Only 3D models are supported, no additional media types",
+        valueType: "boolean",
         configurable: false,
         productSpecCharacteristicValue: [
-          { value: "2", isDefault: true },
-        ],
-      },
-      {
-        id: "3D_MODEL_ASSOCIATED_VIDEOS",
-        name: "Associated Videos Allowed",
-        description: "Number of videos allowed when adding a 3D model as add-on",
-        valueType: "integer",
-        configurable: false,
-        productSpecCharacteristicValue: [
-          { value: "4", isDefault: true },
+          { value: "true", isDefault: true },
         ],
       },
     ],

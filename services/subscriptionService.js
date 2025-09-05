@@ -147,5 +147,5 @@ module.exports = {
   getPartnerSubscriptions,
   getSubscriptionById,
   getAllSubscriptions,
-  logSubscriptionStats
+  getSubscriptionStats
 };

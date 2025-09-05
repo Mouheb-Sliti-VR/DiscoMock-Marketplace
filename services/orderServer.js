@@ -98,17 +98,14 @@ function validateSelection(sel) {
       if (sel.selectedModelsCount === undefined) {
         errors.push({ code: 'MISSING_MODELS_COUNT', message: 'selectedModelsCount is required for 3D model offers' });
       }
-      if (sel.selectedImagesCount === undefined || sel.selectedVideosCount === undefined) {
-        errors.push({ code: 'MISSING_MEDIA_COUNT', message: 'Both selectedImagesCount and selectedVideosCount are required for 3D model offers' });
-      }
       if (sel.selectedModelsCount > offer.ProductSpec.maxModels) {
         errors.push({ code: 'MODEL_COUNT_EXCEEDED', message: `Requested ${sel.selectedModelsCount} models, max allowed ${offer.ProductSpec.maxModels}` });
       }
-      if (sel.selectedImagesCount > offer.ProductSpec.Images) {
-        errors.push({ code: 'IMAGE_COUNT_EXCEEDED', message: `Requested ${sel.selectedImagesCount} images, max allowed ${offer.ProductSpec.Images}` });
+      if (sel.selectedImagesCount !== undefined && sel.selectedImagesCount > 0) {
+        errors.push({ code: 'IMAGES_NOT_SUPPORTED', message: 'Images are not supported in 3D model offers' });
       }
-      if (sel.selectedVideosCount > offer.ProductSpec.Videos) {
-        errors.push({ code: 'VIDEO_COUNT_EXCEEDED', message: `Requested ${sel.selectedVideosCount} videos, max allowed ${offer.ProductSpec.Videos}` });
+      if (sel.selectedVideosCount !== undefined && sel.selectedVideosCount > 0) {
+        errors.push({ code: 'VIDEOS_NOT_SUPPORTED', message: 'Videos are not supported in 3D model offers' });
       }
       break;
   }
