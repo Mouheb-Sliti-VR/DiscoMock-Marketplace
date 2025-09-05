@@ -30,5 +30,21 @@
       "id": "IMG_ADS_OFFER_001",
       "count": 4
     }
+  },
+  "12a0533a-11d0-4f43-a7f1-c1a6b5003709": {
+    "id": "12a0533a-11d0-4f43-a7f1-c1a6b5003709",
+    "orderId": "12a0533a-11d0-4f43-a7f1-c1a6b5003709",
+    "partnerEmail": "mouheb95@gmail.com",
+    "partnerCompanyName": "Mohby95",
+    "status": "ACTIVE",
+    "startDate": "2025-09-05T11:19:18.411Z",
+    "billing": {
+      "amount": 40,
+      "currency": "EUR"
+    },
+    "offering": {
+      "id": "IMG_ADS_OFFER_001",
+      "imagesCount": 4
+    }
   }
 }

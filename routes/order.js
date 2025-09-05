@@ -104,25 +104,23 @@ const verifyToken = async (req, res, next) => {
 // POST /order/validate
 router.post('/validate', verifyToken, async (req, res) => {
   try {
-    const payload = {
-      ...req.body,
-      partner: {
-        id: req.user.email, // Using email as partner ID
-        companyName: req.user.companyName,
-        email: req.user.email
-      }
-    };
-    const result = await validateOrder(payload);
-    // Add partner info to the response
-    res.json({
-      ...result,
-      partner: {
-        companyName: req.user.companyName,
-        email: req.user.email
-      }
-    });
+    const result = await validateOrder(req.body, req.user);
+    
+    res.json(formatResponse(true, {
+      quoteId: result.quoteId,
+      valid: result.valid,
+      price: result.price,
+      ...(result.errors && result.errors.length > 0 && { errors: result.errors })
+    }));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    logger.error('Validation failed', {
+      userId: req.user.email,
+      error: err.message
+    });
+    res.status(400).json(formatResponse(false, null, {
+      code: 'VALIDATION_ERROR',
+      message: err.message
+    }));
   }
 });
 

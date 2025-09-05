@@ -140,7 +140,7 @@ const productOfferings = [
         description: "Price per additional image in mixed content",
         lifecycleStatus: "ACTIVE",
         priceType: "ONE_TIME",
-        price: { taxIncludedAmount: { value: 5.0, unit: "EUR" } },
+        price: { taxIncludedAmount: { value: 10.0, unit: "EUR" } },
       },
       {
         id: "MIXED_VIDEO_PRICE",

@@ -59,17 +59,53 @@ function readSpecNumber(spec, charId) {
 
 function validateSelection(sel) {
   const errors = [];
+  
+  console.log('Validating selection:', {
+    selection: sel,
+    offeringId: sel.offeringId
+  });
+
   const offer = findOffering(sel.offeringId);
-  if (!offer) { errors.push({ code: 'OFFER_NOT_FOUND', message: `Offering ${sel.offeringId} not found` }); return errors; }
+  console.log('Found offer:', {
+    offer: offer,
+    hasProductSpec: !!offer?.ProductSpec
+  });
+
+  if (!offer) { 
+    errors.push({ code: 'OFFER_NOT_FOUND', message: `Offering ${sel.offeringId} not found` }); 
+    return errors; 
+  }
+
+  // Log the offer structure
+  console.log('Offer details:', {
+    id: offer.id,
+    name: offer.name,
+    productSpec: offer.ProductSpec,
+    productSpecification: offer.productSpecification
+  });
 
   // Check if required fields are present based on offer type
+  const spec = findSpecForOffering(offer);
+  console.log('Product specification:', {
+    spec: spec,
+    specId: offer.productSpecification?.id
+  });
+
+  function getMaxCount(spec, characteristicId) {
+    const characteristic = spec?.productSpecCharacteristic?.find(c => c.id === characteristicId);
+    if (!characteristic) return null;
+    const value = characteristic.productSpecCharacteristicValue[0];
+    return value.valueTo ? parseInt(value.valueTo) : parseInt(value.value);
+  }
+
   switch (offer.id) {
     case 'IMG_ADS_OFFER_001':
       if (sel.selectedImagesCount === undefined) {
         errors.push({ code: 'MISSING_IMAGES_COUNT', message: 'selectedImagesCount is required for image offers' });
       }
-      if (sel.selectedImagesCount > offer.ProductSpec.Images) {
-        errors.push({ code: 'IMAGE_COUNT_EXCEEDED', message: `Requested ${sel.selectedImagesCount} images, max allowed ${offer.ProductSpec.Images}` });
+      const maxImages = getMaxCount(spec, 'IMAGE_MAX_COUNT');
+      if (maxImages && sel.selectedImagesCount > maxImages) {
+        errors.push({ code: 'IMAGE_COUNT_EXCEEDED', message: `Requested ${sel.selectedImagesCount} images, max allowed ${maxImages}` });
       }
       break;
 
@@ -77,8 +113,9 @@ function validateSelection(sel) {
       if (sel.selectedVideosCount === undefined) {
         errors.push({ code: 'MISSING_VIDEOS_COUNT', message: 'selectedVideosCount is required for video offers' });
       }
-      if (sel.selectedVideosCount > offer.ProductSpec.Videos) {
-        errors.push({ code: 'VIDEO_COUNT_EXCEEDED', message: `Requested ${sel.selectedVideosCount} videos, max allowed ${offer.ProductSpec.Videos}` });
+      const maxVideos = getMaxCount(spec, 'VIDEO_MAX_COUNT');
+      if (maxVideos && sel.selectedVideosCount > maxVideos) {
+        errors.push({ code: 'VIDEO_COUNT_EXCEEDED', message: `Requested ${sel.selectedVideosCount} videos, max allowed ${maxVideos}` });
       }
       break;
 
@@ -86,11 +123,13 @@ function validateSelection(sel) {
       if (sel.selectedImagesCount === undefined || sel.selectedVideosCount === undefined) {
         errors.push({ code: 'MISSING_MEDIA_COUNT', message: 'Both selectedImagesCount and selectedVideosCount are required for mixed media offers' });
       }
-      if (sel.selectedImagesCount > offer.ProductSpec.Images) {
-        errors.push({ code: 'IMAGE_COUNT_EXCEEDED', message: `Requested ${sel.selectedImagesCount} images, max allowed ${offer.ProductSpec.Images}` });
+      const maxMixedImages = getMaxCount(spec, 'MIXED_IMG_COUNT');
+      if (maxMixedImages && sel.selectedImagesCount > maxMixedImages) {
+        errors.push({ code: 'IMAGE_COUNT_EXCEEDED', message: `Requested ${sel.selectedImagesCount} images, max allowed ${maxMixedImages}` });
       }
-      if (sel.selectedVideosCount > offer.ProductSpec.Videos) {
-        errors.push({ code: 'VIDEO_COUNT_EXCEEDED', message: `Requested ${sel.selectedVideosCount} videos, max allowed ${offer.ProductSpec.Videos}` });
+      const maxMixedVideos = getMaxCount(spec, 'MIXED_VIDEO_COUNT');
+      if (maxMixedVideos && sel.selectedVideosCount > maxMixedVideos) {
+        errors.push({ code: 'VIDEO_COUNT_EXCEEDED', message: `Requested ${sel.selectedVideosCount} videos, max allowed ${maxMixedVideos}` });
       }
       break;
 
@@ -98,8 +137,9 @@ function validateSelection(sel) {
       if (sel.selectedModelsCount === undefined) {
         errors.push({ code: 'MISSING_MODELS_COUNT', message: 'selectedModelsCount is required for 3D model offers' });
       }
-      if (sel.selectedModelsCount > offer.ProductSpec.maxModels) {
-        errors.push({ code: 'MODEL_COUNT_EXCEEDED', message: `Requested ${sel.selectedModelsCount} models, max allowed ${offer.ProductSpec.maxModels}` });
+      const maxModels = getMaxCount(spec, '3D_MODEL_MAX_COUNT');
+      if (maxModels && sel.selectedModelsCount > maxModels) {
+        errors.push({ code: 'MODEL_COUNT_EXCEEDED', message: `Requested ${sel.selectedModelsCount} models, max allowed ${maxModels}` });
       }
       if (sel.selectedImagesCount !== undefined && sel.selectedImagesCount > 0) {
         errors.push({ code: 'IMAGES_NOT_SUPPORTED', message: 'Images are not supported in 3D model offers' });
@@ -129,16 +169,13 @@ async function validatePartner(partyId) {
   }
 }
 
-async function validateOrder(payload) {
-  const { partyId, selections } = payload;
+async function validateOrder(payload, user) {
+  const { selections } = payload;
   const errors = [];
 
-  if (!partyId || !Array.isArray(selections)) {
-    return { valid: false, errors: [{ code: 'BAD_REQUEST', message: 'partyId and selections[] required' }] };
+  if (!Array.isArray(selections)) {
+    return { valid: false, errors: [{ code: 'BAD_REQUEST', message: 'selections[] array is required' }] };
   }
-
-  const pv = await validatePartner(partyId);
-  if (!pv.ok) errors.push({ code: 'PARTY_VALIDATION_FAILED', message: pv.reason || 'partner validation failed', detail: pv.detail ?? null });
 
   let total = 0;
   for (const s of selections) {
