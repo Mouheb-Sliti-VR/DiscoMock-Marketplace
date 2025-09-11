@@ -141,12 +141,7 @@ function validateSelection(sel) {
       if (maxModels && sel.selectedModelsCount > maxModels) {
         errors.push({ code: 'MODEL_COUNT_EXCEEDED', message: `Requested ${sel.selectedModelsCount} models, max allowed ${maxModels}` });
       }
-      if (sel.selectedImagesCount !== undefined && sel.selectedImagesCount > 0) {
-        errors.push({ code: 'IMAGES_NOT_SUPPORTED', message: 'Images are not supported in 3D model offers' });
-      }
-      if (sel.selectedVideosCount !== undefined && sel.selectedVideosCount > 0) {
-        errors.push({ code: 'VIDEOS_NOT_SUPPORTED', message: 'Videos are not supported in 3D model offers' });
-      }
+      // Allow images and videos as part of the 3D model offer (no errors)
       break;
   }
 
